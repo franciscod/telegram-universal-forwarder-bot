@@ -13,9 +13,9 @@ Also, this is kind of a re-iteration on [TwitterForwarderBot](https://github.com
 
 **The code is currently targeting Python 3.5**
 
-TL;DR:
+- TL;DR:
 
-```
+```sh
 # clone this thing
 # create your virtualenv, activate it:
 #     virtualenv -p python3 venv
