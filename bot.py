@@ -1,10 +1,16 @@
 import os
 import asyncio
 from aiotg import TgBot
-
 import sublogic
 
 bot = TgBot(os.environ["TG_BOT_TOKEN"])
+
+
+# http://www.peterbe.com/plog/uniqifiers-benchmark -- by Lukáš, 13 January 2016. thank you!
+def uniquify(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
 
 
 @bot.default
@@ -12,35 +18,9 @@ def default(chat, msg):
     return chat.reply("Hello! Check out my commands with /help")
 
 
-@bot.command(r"/help")
-@bot.command(r"/start")
-def help(chat, match):
-    return chat.reply("""
-Hello! This bot lets you subscribe to RSS/Atom feeds.
-Here's the commands:
-- /feedsub - subscribes to a feed
-- /list  - lists current subscriptions
-- /feedunsub - unsubscribes from a feed
-- /export - sends you a /sub command that contains all current subscriptions
-- /wipe - the bot forgets all the data about you
-- /source - info about source code
-- /help - view this help text (also triggered with /start)
-This bot is being worked on, so it may break sometimes. Contact @franciscod if you want to!
-""")
-
-
-@bot.command(r"/source")
-def source(chat, match):
-    return chat.reply("""
-This bot is Free Software under the LGPLv3.
-It is powered by the awesome feedparser library: https://github.com/kurtmckee/feedparser
-You can get the code from here:
-https://github.com/franciscod/telegram-universal-feed-bot
-""")
-
-
 @bot.command(r"/feedsub(.*)")
-def sub(chat, match):
+def feedsub(chat, match):
+    """subscribes to a feed"""
     urls = match.group(1).split()
 
     if not urls:
@@ -55,18 +35,21 @@ def sub(chat, match):
 
 @bot.command(r"/list")
 def list(chat, match):
+    """lists current subscriptions"""
     # TODO get the chat subscriptions and show them verbosely
     pass
 
 
 @bot.command(r"/export")
 def export(chat, match):
+    """sends you a /sub command that contains all current subscriptions"""
     # TODO get the chat subscriptions and show them in a whole line of /feedsub
     pass
 
 
 @bot.command(r"/feedunsub")
-def unsub_show(chat, match):
+def feedunsub(chat, match):
+    """unsubscribes from a feed"""
     # TODO get the chat subscriptions and show them as clickable commands
     # with /feedunsub_1, /feedunsub_2. /feedunsub_3 and so on
     # TODO potentially this would use a custom keyboard
@@ -80,7 +63,8 @@ def unsub_do(chat, match):
 
 
 @bot.command(r"/wipe")
-def wipe_ask(chat, match):
+def wipe(chat, match):
+    """the bot forgets all the data about you"""
     # TODO ask for confirmation
     # TODO mark a flag that expires in 1min
     pass
@@ -92,7 +76,33 @@ def wipe_do(chat, match):
     pass
 
 
+@bot.command(r"/source")
+def source(chat, match):
+    """info about source code"""
+    return chat.reply("""
+This bot is Free Software under the LGPLv3.
+It is powered by the awesome feedparser library: https://github.com/kurtmckee/feedparser
+You can get the code from here:
+https://github.com/franciscod/telegram-universal-feed-bot
+""")
 
+
+@bot.command(r"/help")
+@bot.command(r"/start")
+def help(chat, match):
+    """view help text"""
+    fns = uniquify(fn for re, fn in bot._commands)
+
+    command_docstrings = ["/{} - {}".format(fn.__name__, fn.__doc__)
+                          for fn in fns if fn.__doc__ is not None]
+
+    return chat.reply('\n'.join([
+        "Hello! This bot lets you subscribe to RSS/Atom feeds.",
+        "Here's the commands:",
+        *command_docstrings,
+        "This bot is being worked on, so it may break sometimes. "
+        "Contact @franciscod if you want to chat about it!"
+    ]))
 
 if __name__ == '__main__':
     sublogic.init()
