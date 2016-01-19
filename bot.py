@@ -5,7 +5,6 @@ from aiotg import TgBot
 import sublogic
 
 bot = TgBot(os.environ["TG_BOT_TOKEN"])
-CHAT_ID_KEEPALIVE = '9147949'  # @franciscod telegram id for development purposes
 
 
 @bot.default
@@ -92,17 +91,9 @@ def wipe_do(chat, match):
     # TODO check if the flag hasn't expired and wipe
     pass
 
-async def say(wat, chat_id):
-    await bot.send_message(chat_id=chat_id, text=wat)
 
 
-async def keepalive():
-    await say('started!', chat_id=CHAT_ID_KEEPALIVE)
-    while True:
-        await asyncio.sleep(30*60)
-        await say('still alive!', chat_id=CHAT_ID_KEEPALIVE)
 
 if __name__ == '__main__':
     sublogic.init()
-    asyncio.ensure_future(keepalive())
     bot.run()
