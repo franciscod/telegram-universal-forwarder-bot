@@ -1,0 +1,6 @@
+/venv/
+__pycache__/
+
+peewee.db
+.pip-tools-installed-flag
+
