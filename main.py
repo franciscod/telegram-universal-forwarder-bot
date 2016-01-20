@@ -100,9 +100,8 @@ def source(chat, match):
     """info about source code"""
     return chat.reply("""
 This bot is Free Software under the LGPLv3.
-It is powered by the awesome feedparser library: https://github.com/kurtmckee/feedparser
 You can get the code from here:
-https://github.com/franciscod/telegram-universal-feed-bot
+https://github.com/franciscod/telegram-universal-forwarder-bot
 """)
 
 
