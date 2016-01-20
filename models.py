@@ -2,14 +2,18 @@ import datetime
 from peewee import (Model, DateTimeField, ForeignKeyField, CharField, IntegerField)
 from playhouse.gfk import Model as GFKModel, GFKField, ReverseGFK
 
+from aiotg import TgChat
+
 
 class Meta(Model):
     version = IntegerField(default=1)
 
 
-class Subscription(GFKModel):
+class BaseModel(GFKModel):
     known_at = DateTimeField(default=datetime.datetime.now)
 
+
+class Subscription(BaseModel):
     subscriber_type = CharField(null=True)
     subscriber_id = IntegerField(null=True)
     subscriber = GFKField('subscriber_type', 'subscriber_id')
@@ -22,18 +26,56 @@ class Subscription(GFKModel):
     last_update_id = IntegerField(null=True)
     last_update = GFKField('last_update_type', 'last_update_id')
 
+    class Meta:
+        indexes = (
+            ((
+                'subscriber_type',
+                'subscriber_id',
+                'resource_type',
+                'resource_id',
+            ), True),
+        )
 
-class Feed(GFKModel):
-    known_at = DateTimeField(default=datetime.datetime.now)
+
+class Resource(BaseModel):
     subscriptions = ReverseGFK(Subscription, 'resource_type', 'resource_id')
 
+    def _subscribe(self, subscriber):
+        _, created = Subscription.create_or_get(subscriber=subscriber, resource=self)
+        return created
+
+
+class Update(BaseModel):
+    pass
+
+
+class TelegramChat(BaseModel):
+    subscriptions = ReverseGFK(Subscription, 'subscriber_type', 'subscriber_id')
+
+    chat_id = IntegerField(unique=True)
+    chat_type = CharField()
+    last_contact = DateTimeField(default=datetime.datetime.now)
+
+    @classmethod
+    def from_aiotg(cls, chat):
+        obj, _ = cls.create_or_get(chat_id=chat.id, chat_type=chat.type)
+        return obj
+
+    def touch_last_contact(self):
+        self.last_contact = datetime.datetime.now()
+        self.save()
+
+    def aiotg_chat(self, bot):
+        return TgChat(bot, self.chat_id, self.chat_type)
+
+
+class Feed(Resource):
     url = CharField(unique=True)
     title = CharField()
 
 
-class Post(GFKModel):
-    known_at = DateTimeField(default=datetime.datetime.now)
-    feed = ForeignKeyField(Feed, related_name='updates')
+class Post(Update):
+    resource = ForeignKeyField(Feed, related_name='updates')
 
     guid = CharField(unique=True)
     title = CharField()
@@ -42,18 +84,6 @@ class Post(GFKModel):
     published = DateTimeField()  # TODO: feedparser will output a tuple
 
 
-class TelegramChat(GFKModel):
-    known_at = DateTimeField(default=datetime.datetime.now)
-    subscriptions = ReverseGFK(Subscription, 'subscriber_type', 'subscriber_id')
-
-    chat_id = IntegerField(unique=True)
-    last_contact = DateTimeField(default=datetime.datetime.now)
-
-    def touch_last_contact(self):
-        self.last_contact = datetime.datetime.now()
-        self.save()
-
-
 def create_tables():
-    for t in (Feed, TelegramChat, Subscription):
+    for t in (Subscription, TelegramChat):
         t.create_table(fail_silently=True)

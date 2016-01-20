@@ -5,7 +5,7 @@ endif
 .PHONY: run
 
 run:
-	python bot.py
+	python main.py
 
 .pip-tools-installed-flag:
 	@echo "## Installing pip-tools"
