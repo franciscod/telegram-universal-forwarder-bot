@@ -1,24 +1,9 @@
 import os
 
+from aiotg import TgBot
+
 import models
-from aiotg import TgBot as AioTgBot
-import resources.clock
-
-
-class TgBot(AioTgBot):
-
-    def command(self, regexp):
-
-        def deco_tgchat_aware(aware_fn):
-
-            def fn(chat, match):
-                chat.model = models.TelegramChat.from_aiotg(chat)
-                return aware_fn(chat, match)
-
-            return super(TgBot, self).command(regexp)(fn)
-
-        return deco_tgchat_aware
-
+import resources
 
 # http://www.peterbe.com/plog/uniqifiers-benchmark -- by Lukáš, 13 January 2016. thank you!
 
@@ -29,8 +14,7 @@ def uniquify(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def bind_base_handlers(bot):
-
+def base_bootup(bot):
     @bot.default
     def default(chat, msg):
         return chat.reply("Hello! Check out my commands with /help")
@@ -45,6 +29,25 @@ def bind_base_handlers(bot):
     def export(chat, match):
         """sends you the proper commands that contains all current subscriptions"""
         # TODO get the chat subscriptions and show them in a whole line of /feedsub
+        pass
+
+    @bot.command(r"/unsub")
+    def unsub(chat, match):
+        """unsubscribe from things you've subscribed earlier"""
+
+        chat_model = models.TelegramChat.from_aiotg(chat)
+
+        l = []
+        for sub in chat_model.subscriptions:
+            res = sub.resource
+            l.append("- {}".format(res))
+
+        return chat.reply('\n'.join(l))
+
+    @bot.command(r"/clockunsub_(.*)")
+    def unsub_do(chat, match):
+        # minute = match.group(1)
+        # FIXME sublogic.unsubscribe(telegram_chat_id=chat.id, clock_minute=minute)
         pass
 
     @bot.command(r"/wipe")
@@ -90,7 +93,7 @@ def bind_base_handlers(bot):
 if __name__ == '__main__':
     models.create_tables()
     bot = TgBot(os.environ["TG_BOT_TOKEN"])
-    resources.clock.init(bot)
+    resources.Clock.bootup(bot)
 
-    bind_base_handlers(bot)
+    base_bootup(bot)
     bot.run()

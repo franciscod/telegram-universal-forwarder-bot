@@ -1,11 +1,11 @@
 import asyncio
 from datetime import datetime
 
-from .util import future_replies, subscribe
-from models import Resource, IntegerField
+from .base import BaseResource
+from peewee import IntegerField
 
 
-class Clock(Resource):
+class Clock(BaseResource):
     interval = IntegerField(unique=True)
 
     @property
@@ -31,78 +31,31 @@ class Clock(Resource):
         asyncio.ensure_future(self.loop(bot))
 
     @classmethod
-    def bring_up(cls, bot, interval):
+    def validate(cls, interval):
+        error = False
+
+        if not interval:
+            error = True
         try:
             interval = int(interval)
         except ValueError:
-            raise TypeError
+            error = True
+        else:
+            if interval < 1:
+                error = True
 
-        if interval < 1:
-            raise ValueError
+        if error:
+            raise RuntimeError('Please provide a positive integer (like 1, 5 or 60)')
 
+    @classmethod
+    def bring_up(cls, bot, interval):
+        interval = int(interval)
         clock, created = cls.create_or_get(interval=interval)
 
         if created:
             clock.start(bot)
 
+        return clock
 
-def init(bot):
-    Clock.create_table(fail_silently=True)
-
-    for clock in Clock.select():
-        clock.start(bot)
-
-    bind(bot)
-
-
-def bind(bot):
-
-    @bot.command(r"/clocksub(.*)")
-    def clocksub(chat, match):
-        """subscribes to one or more clocks"""
-        minutes = match.group(1).split()
-
-        with future_replies(chat) as add_reply:
-
-            if not minutes:
-                add_reply("Use /clocksub <minute> [<minute>...]")
-                return
-
-            for minute in minutes:
-                try:
-                    clock = Clock.bring_up(bot, minute)
-                except TypeError:
-                    add_reply((
-                        "Adding a clock with '{}' minutes didn't work. "
-                        "Please provide an integer amount of minutes like 1 or 5 or 60."
-                    ).format(minute))
-                    continue
-                except ValueError:
-                    add_reply(
-                        "You can't subscribe to a clock with intervals less than 1!")
-                    continue
-
-                sub, sub_created = subscribe(chat.model, clock)
-
-                if sub_created:
-                    add_reply((
-                        "OK! Subscribed to a clock with interval of {} minutes."
-                    ).format(minute))
-                else:
-                    add_reply((
-                        "You were already subscribed to a clock with interval of {} minutes!"
-                    ).format(minute))
-
-    @bot.command(r"/clockunsub")
-    def clockunsub(chat, match):
-        """unsubscribes from a clock"""
-        # TODO get the chat subscriptions and show them as clickable commands
-        # with /clockunsub_1, /clockunsub_2. /clockunsub_3 and so on
-        # TODO potentially this would use a custom keyboard
-        pass
-
-    @bot.command(r"/clockunsub_(.*)")
-    def unsub_do(chat, match):
-        # minute = match.group(1)
-        # FIXME sublogic.unsubscribe(telegram_chat_id=chat.id, clock_minute=minute)
-        pass
+    def __str__(self):
+        return "Clock with {}-minute interval".format(self.interval)

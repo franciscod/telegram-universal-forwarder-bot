@@ -22,9 +22,9 @@ class Subscription(BaseModel):
     resource_id = IntegerField(null=True)
     resource = GFKField('resource_type', 'resource_id')
 
-    last_update_type = CharField(null=True)
-    last_update_id = IntegerField(null=True)
-    last_update = GFKField('last_update_type', 'last_update_id')
+    extra_type = CharField(null=True)
+    extra_id = IntegerField(null=True)
+    extra = GFKField('extra_type', 'extra_id')
 
     class Meta:
         indexes = (
@@ -35,14 +35,6 @@ class Subscription(BaseModel):
                 'resource_id',
             ), True),
         )
-
-
-class Resource(BaseModel):
-    subscriptions = ReverseGFK(Subscription, 'resource_type', 'resource_id')
-
-
-class Update(BaseModel):
-    pass
 
 
 class TelegramChat(BaseModel):
