@@ -74,7 +74,7 @@ def bind(bot):
                 except TypeError:
                     add_reply((
                         "Adding a clock with '{}' minutes didn't work. "
-                        "Please provide an integer amount of like 1 or 5 or 60."
+                        "Please provide an integer amount of minutes like 1 or 5 or 60."
                     ).format(minute))
                     continue
                 except ValueError:
