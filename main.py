@@ -88,6 +88,10 @@ def unsub_do(chat, match):
 def wipe(chat, match):
     """the bot forgets all the data about you"""
     chat_model = models.TelegramChat.from_aiotg(chat)
+
+    for sub in chat_model.subscriptions:
+        sub.delete_instance()
+
     chat_model.delete_instance(recursive=True)
     return chat.reply('Okay, goodbye!')
 
