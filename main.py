@@ -18,7 +18,7 @@ def default(chat, msg):
     return chat.reply("Hello! Check out my commands with /help")
 
 
-def list(chat, match):
+def listsubs(chat, match):
     """lists current subscriptions"""
     chat_model = models.TelegramChat.from_aiotg(chat)
 
@@ -97,7 +97,7 @@ def help(chat, match):
 
 def base_bootup(bot):
     bot.default(default)
-    bot.command("/list")(list)
+    bot.command("/listsubs")(listsubs)
     bot.command("/export")(export)
     bot.command("/unsub$")(unsub)
     bot.command("/unsub_(.*)")(unsub_do)
