@@ -69,21 +69,6 @@ class TelegramChat(BaseModel):
         return TgChat(bot, self.chat_id, self.chat_type)
 
 
-class Feed(Resource):
-    url = CharField(unique=True)
-    title = CharField()
-
-
-class Post(Update):
-    resource = ForeignKeyField(Feed, related_name='updates')
-
-    guid = CharField(unique=True)
-    title = CharField()
-    link = CharField()
-    description = CharField()
-    published = DateTimeField()  # TODO: feedparser will output a tuple
-
-
 def create_tables():
     for t in (Subscription, TelegramChat):
         t.create_table(fail_silently=True)
