@@ -8,6 +8,10 @@ class BaseResource(BaseModel):
     subscriptions = ReverseGFK(Subscription, 'resource_type', 'resource_id')
 
     @classmethod
+    def name(cls):
+        return cls.__name__.lower()
+
+    @classmethod
     def bootup(cls, bot):
 
         cls.create_table(fail_silently=True)
@@ -29,12 +33,11 @@ class BaseResource(BaseModel):
 
                 res = cls.bring_up(bot, args)
                 sub, sub_created = subscribe(chat_model, res)
-
                 add_reply(
                     "OK, subscribed!" if sub_created
                     else "You were already subscribed to that one!")
 
-        name = cls.__name__.lower()
+        name = cls.name()
         subfn.__name__ = name + "sub"
         subfn.__doc__ = "subscribe to a " + name
         bot.command("/" + subfn.__name__ + "(.*)")(subfn)

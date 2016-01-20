@@ -31,31 +31,35 @@ class Clock(BaseResource):
         asyncio.ensure_future(self.loop(bot))
 
     @classmethod
-    def validate(cls, interval):
+    def validate(cls, arg):
         error = False
 
-        if not interval:
+        if not arg:
             error = True
         try:
-            interval = int(interval)
+            arg = int(arg)
         except ValueError:
             error = True
         else:
-            if interval < 1:
+            if arg < 1:
                 error = True
 
         if error:
             raise RuntimeError('Please provide a positive integer (like 1, 5 or 60)')
 
     @classmethod
-    def bring_up(cls, bot, interval):
-        interval = int(interval)
-        clock, created = cls.create_or_get(interval=interval)
+    def bring_up(cls, bot, arg):
+        arg = int(arg)
+        clock, created = cls.create_or_get(interval=arg)
 
         if created:
             clock.start(bot)
 
         return clock
+
+    @property
+    def sub_command(self):
+        return '/{}sub {}'.format(self.name(), self.interval)
 
     def __str__(self):
         return "Clock with {}-minute interval".format(self.interval)
