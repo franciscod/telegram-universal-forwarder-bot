@@ -15,6 +15,17 @@ def future_replies(chat):
     )
 
 
+@contextmanager
+def future_texts(chat):
+    texts = []
+
+    yield (lambda t: texts.append(t))
+
+    asyncio.ensure_future(
+        asyncio.gather(*[chat.send_text(text) for text in texts])
+    )
+
+
 def subscribe(subscriber, resource):
     # HACK workaround for using get_or_create / create_or_get with GFKFields.
     try:

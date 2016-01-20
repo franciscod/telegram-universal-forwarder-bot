@@ -1,9 +1,11 @@
 import os
+import asyncio
 
 from aiotg import TgBot
 
 import models
 import resources
+from resources.util import future_texts
 
 # http://www.peterbe.com/plog/uniqifiers-benchmark -- by Lukáš, 13 January 2016. thank you!
 
@@ -32,17 +34,19 @@ def listsubs(chat, match):
     return chat.reply('\n'.join(l))
 
 
-async def export(chat, match):
+@asyncio.coroutine
+def export(chat, match):
     """sends you the proper commands that contains commands for restoring your subscriptions"""
     chat_model = models.TelegramChat.from_aiotg(chat)
 
     if len(chat_model.subscriptions) == 0:
         return chat.reply('This chat has no subscriptions!')
 
-    await chat.reply('Here are your subscription commands. You can forward them to me!')
+    yield from chat.reply('Here are your subscription commands. You can forward them to me!')
 
-    for sub in chat_model.subscriptions:
-        await chat.send_text(sub.resource.sub_command)
+    with future_texts(chat) as add_text:
+        for sub in chat_model.subscriptions:
+            add_text(sub.resource.sub_command)
 
 
 def unsub(chat, match):
