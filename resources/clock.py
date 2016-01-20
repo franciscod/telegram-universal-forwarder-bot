@@ -43,6 +43,8 @@ class Clock(BaseResource):
         else:
             if arg < 1:
                 error = True
+            if arg > 60:
+                error = True
 
         if error:
             raise RuntimeError('Please provide a positive integer (like 1, 5 or 60)')
