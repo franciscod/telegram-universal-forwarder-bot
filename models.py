@@ -1,5 +1,5 @@
 import datetime
-from peewee import (Model, DateTimeField, ForeignKeyField, CharField, IntegerField)
+from peewee import (Model, DateTimeField, CharField, IntegerField)
 from playhouse.gfk import Model as GFKModel, GFKField, ReverseGFK
 
 from aiotg import TgChat
@@ -39,10 +39,6 @@ class Subscription(BaseModel):
 
 class Resource(BaseModel):
     subscriptions = ReverseGFK(Subscription, 'resource_type', 'resource_id')
-
-    def _subscribe(self, subscriber):
-        _, created = Subscription.create_or_get(subscriber=subscriber, resource=self)
-        return created
 
 
 class Update(BaseModel):

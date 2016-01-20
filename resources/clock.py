@@ -1,7 +1,8 @@
-from models import Resource, IntegerField, TelegramChat
+import asyncio
 from datetime import datetime
 
-import asyncio
+from .util import future_replies, subscribe
+from models import Resource, IntegerField
 
 
 class Clock(Resource):
@@ -30,7 +31,7 @@ class Clock(Resource):
         asyncio.ensure_future(self.loop(bot))
 
     @classmethod
-    def bring_up(cls, interval):
+    def bring_up(cls, bot, interval):
         try:
             interval = int(interval)
         except ValueError:
@@ -39,8 +40,10 @@ class Clock(Resource):
         if interval < 1:
             raise ValueError
 
-        self, created = cls.create_or_get(interval=interval)
-        return self
+        clock, created = cls.create_or_get(interval=interval)
+
+        if created:
+            clock.start(bot)
 
 
 def init(bot):
@@ -53,47 +56,42 @@ def init(bot):
 
 
 def bind(bot):
+
     @bot.command(r"/clocksub(.*)")
     def clocksub(chat, match):
         """subscribes to one or more clocks"""
         minutes = match.group(1).split()
 
-        if not minutes:
-            return chat.reply("Use /clocksub <minute> [<minute>...]")
+        with future_replies(chat) as add_reply:
 
-        futs = []
+            if not minutes:
+                add_reply("Use /clocksub <minute> [<minute>...]")
+                return
 
-        for minute in minutes:
-
-            try:
-                clock = Clock.bring_up(minute)
-            except TypeError:
-                futs.append(
-                    chat.reply((
+            for minute in minutes:
+                try:
+                    clock = Clock.bring_up(bot, minute)
+                except TypeError:
+                    add_reply((
                         "Adding a clock with '{}' minutes didn't work. "
                         "Please provide an integer amount of like 1 or 5 or 60."
-                    ).format(minute)))
-                continue
-            except ValueError:
-                futs.append(
-                    chat.reply(
-                        "You can't subscribe to a clock with intervals less than 1!"))
+                    ).format(minute))
+                    continue
+                except ValueError:
+                    add_reply(
+                        "You can't subscribe to a clock with intervals less than 1!")
+                    continue
 
-            clock.start(bot)
-            subscribed = clock._subscribe(TelegramChat.from_aiotg(chat))
+                sub, sub_created = subscribe(chat.model, clock)
 
-            if subscribed:
-                futs.append(
-                    chat.reply((
+                if sub_created:
+                    add_reply((
                         "OK! Subscribed to a clock with interval of {} minutes."
-                    ).format(minute)))
-            else:
-                futs.append(
-                    chat.reply((
+                    ).format(minute))
+                else:
+                    add_reply((
                         "You were already subscribed to a clock with interval of {} minutes!"
-                    ).format(minute)))
-
-        return asyncio.gather(*futs)
+                    ).format(minute))
 
     @bot.command(r"/clockunsub")
     def clockunsub(chat, match):

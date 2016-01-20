@@ -1,10 +1,28 @@
 import os
+
 import models
-from aiotg import TgBot
+from aiotg import TgBot as AioTgBot
 import resources.clock
 
 
+class TgBot(AioTgBot):
+
+    def command(self, regexp):
+
+        def deco_tgchat_aware(aware_fn):
+
+            def fn(chat, match):
+                chat.model = models.TelegramChat.from_aiotg(chat)
+                return aware_fn(chat, match)
+
+            return super(TgBot, self).command(regexp)(fn)
+
+        return deco_tgchat_aware
+
+
 # http://www.peterbe.com/plog/uniqifiers-benchmark -- by Lukáš, 13 January 2016. thank you!
+
+
 def uniquify(seq):
     seen = set()
     seen_add = seen.add
