@@ -54,9 +54,9 @@ def unsub(chat, match):
         return chat.reply('This chat has no subscriptions!')
 
     l = []
-    for i, sub in enumerate(chat_model.subscriptions):
+    for sub in chat_model.subscriptions:
         res = sub.resource
-        l.append('/unsub_{} - {}'.format(i, res))
+        l.append('/unsub_{} - {}'.format(res.cmd_id, res))
     return chat.reply('\n'.join(l))
 
 

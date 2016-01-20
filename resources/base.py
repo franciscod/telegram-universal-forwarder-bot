@@ -11,6 +11,10 @@ class BaseResource(BaseModel):
     def name(cls):
         return cls.__name__.lower()
 
+    @property
+    def cmd_id(self):
+        raise NotImplemented
+
     @classmethod
     def bootup(cls, bot):
 

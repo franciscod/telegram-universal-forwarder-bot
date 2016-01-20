@@ -61,5 +61,9 @@ class Clock(BaseResource):
     def sub_command(self):
         return '/{}sub {}'.format(self.name(), self.interval)
 
+    @property
+    def cmd_id(self):
+        return '{}{}'.format(self.name(), self.interval)
+
     def __str__(self):
         return "Clock with {}-minute interval".format(self.interval)
