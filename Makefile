@@ -11,9 +11,9 @@ run:
 	@echo "## Installing pip-tools"
 	# https://pip.pypa.io/en/stable/user_guide/#only-if-needed-recursive-upgrade
 	pip install --upgrade pip-tools
-	touch pip-tools
+	touch .pip-tools-installed-flag
 
-requirements.txt: requirements.in pip-tools
+requirements.txt: requirements.in .pip-tools-installed-flag
 	@echo "## Compiling requirements.txt"
 	pip-compile requirements.in
 
