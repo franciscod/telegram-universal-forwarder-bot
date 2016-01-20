@@ -7,6 +7,10 @@ from .util import future_replies, subscribe
 class BaseResource(BaseModel):
     subscriptions = ReverseGFK(Subscription, 'resource_type', 'resource_id')
 
+    @property
+    def _should_run(self):
+        return len(self.subscriptions) > 0
+
     @classmethod
     def name(cls):
         return cls.__name__.lower()

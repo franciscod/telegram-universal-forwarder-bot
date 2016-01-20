@@ -23,7 +23,7 @@ class Clock(BaseResource):
 
             return asyncio.gather(*futs)
 
-        while True:
+        while self._should_run:
             await asyncio.sleep(self.seconds_to_next_tick)
             await tick(bot)
 
