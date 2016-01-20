@@ -1,11 +1,11 @@
-# telegram-universal-feed-bot
-Hello! This is a [Telegram](https://telegram.org) bot that forwards Atom/RSS feeds to Telegram chats.
+# telegram-universal-forwarder-bot
+Hello! This is a [Telegram](https://telegram.org) bot that will forward many kinds of feeds to Telegram chats.
 
 It's not available on Telegram yet, but stay tuned!
 
-Also, this is kind of a re-iteration on [TwitterForwarderBot](https://github.com/franciscod/telegram-twitter-forwarder-bot):
- - PRO: the interface is very similar to it
- - PRO: aims to be more generic so many types of resources can be subscribed to (twitter, atom/rss; the sky is the limit!)
+This is kind of a re-iteration on [TwitterForwarderBot](https://github.com/franciscod/telegram-twitter-forwarder-bot):
+ - PRO: the interface will be very similar to it
+ - PRO: aims to be more generic so many types of resources can be subscribed to (twitter, atom/rss, a ticking clock!!! - the sky is the limit!)
  - CON: isn't implemented yet
 
 
