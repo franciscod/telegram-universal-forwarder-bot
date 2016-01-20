@@ -1,5 +1,4 @@
 import os
-import asyncio
 
 from aiotg import TgBot
 
