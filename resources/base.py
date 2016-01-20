@@ -46,6 +46,6 @@ class BaseResource(BaseModel):
                     else "You were already subscribed to that one!")
 
         name = cls.name()
-        subfn.__name__ = name + "sub"
+        subfn.__name__ = "sub_" + name
         subfn.__doc__ = "subscribe to a " + name
         bot.command("/" + subfn.__name__ + "(.*)")(subfn)
