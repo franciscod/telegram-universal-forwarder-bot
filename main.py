@@ -61,12 +61,31 @@ def unsub(chat, match):
 
 
 def unsub_do(chat, match):
-    return chat.reply('not implemented yet!')
+    chat_model = models.TelegramChat.from_aiotg(chat)
+
+    cmd_id = ' '.join(match.groups(1))
+
+    for sub in chat_model.subscriptions:
+        if sub.resource.cmd_id == cmd_id:
+            break
+    else:
+        return chat.reply("Whoops! That didn't work")
+
+    res = sub.resource
+    sub.delete_instance()
+    msg = "Removed subscription to {}".format(res)
+
+    if len(res.subscriptions) == 0:
+        res.delete_instance()
+
+    return chat.reply(msg)
 
 
 def wipe(chat, match):
     """the bot forgets all the data about you"""
-    return chat.reply('not implemented yet!')
+    chat_model = models.TelegramChat.from_aiotg(chat)
+    chat_model.delete_instance(recursive=True)
+    return chat.reply('Okay, goodbye!')
 
 
 def source(chat, match):
