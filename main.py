@@ -113,7 +113,7 @@ def help(chat, match):
                           for fn in fns if fn.__doc__ is not None]
 
     return chat.reply('\n'.join([
-        "Hello! This bot lets you subscribe to RSS/Atom feeds.",
+        "Hello! This bot lets you subscribe to various feeds.",
         "Here's the commands:",
         *command_docstrings,
         "This bot is being worked on, so it may break sometimes. "
