@@ -2,7 +2,7 @@ import datetime
 from peewee import (Model, DateTimeField, CharField, IntegerField)
 from playhouse.gfk import Model as GFKModel, GFKField, ReverseGFK
 
-from aiotg import TgChat
+from aiotg import Chat
 
 
 class Meta(Model):
@@ -54,7 +54,7 @@ class TelegramChat(BaseModel):
         self.save()
 
     def aiotg_chat(self, bot):
-        return TgChat(bot, self.chat_id, self.chat_type)
+        return Chat(bot, self.chat_id, self.chat_type)
 
 
 def create_tables():

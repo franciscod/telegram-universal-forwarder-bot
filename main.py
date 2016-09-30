@@ -1,7 +1,7 @@
 import os
 import asyncio
 
-from aiotg import TgBot
+from aiotg import Bot
 
 import models
 import resources
@@ -136,7 +136,7 @@ def base_bootup(bot):
 
 if __name__ == '__main__':
     models.create_tables()
-    bot = TgBot(os.environ["TG_BOT_TOKEN"])
+    bot = Bot(os.environ["TG_BOT_TOKEN"])
     resources.Clock.bootup(bot)
 
     base_bootup(bot)
