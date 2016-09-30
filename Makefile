@@ -15,7 +15,7 @@ run:
 
 requirements.txt: requirements.in .pip-tools-installed-flag
 	@echo "## Compiling requirements.txt"
-	pip-compile requirements.in
+	pip-compile --output-file requirements.txt requirements.in
 
 .PHONY: pip-sync
 pip-sync: requirements.txt
